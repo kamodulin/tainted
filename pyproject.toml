@@ -16,4 +16,4 @@ profile = "black"
 line_length = 88
 
 [tool.pytest.ini_options]
-addopts = "--cov=src --cov-report=term-missing --ignore=tests/test_perf.py"
+addopts = "--cov=tainted --cov-report=term-missing --ignore=tests/test_perf.py"

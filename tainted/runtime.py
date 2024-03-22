@@ -120,7 +120,13 @@ def make_taintable(obj: Any) -> Any:
         return taint_class(obj)
 
     # Otherwise, initialize the hooks directly on the object
-    create_taintable_object(obj)  # TODO: rename
+    try:
+        create_taintable_object(obj)
+    except AttributeError as e:
+        logger.debug(
+            f"Falling back to tainted object id tracking for object of type {_type}: {e}"
+        )
+        tainted_object_ids.add(id(obj))
     return obj
 
 
@@ -202,21 +208,12 @@ def create_taintable_object(obj):
             continue
 
         if callable(getattr(obj, attr)):
-            try:
-                class_method = getattr(obj, attr).__func__
-                setattr(obj, attr, MethodType(propagate_taint(class_method), obj))
-            except AttributeError as e:
-                logger.debug(
-                    f"Unable to set method {attr} (fall back to tracking object id instead): {e}"
-                )
-                tainted_object_ids.add(id(obj))
+            class_method = getattr(obj, attr).__func__
+            setattr(obj, attr, MethodType(propagate_taint(class_method), obj))
 
-    try:
-        setattr(obj, "is_tainted", False)
-        setattr(obj, "taint", MethodType(taint, obj))
-        setattr(obj, "untaint", MethodType(untaint, obj))
-    except AttributeError as e:
-        logger.debug(f"Unable to set taint tracking on object: {e}")
+    setattr(obj, "is_tainted", False)
+    setattr(obj, "taint", MethodType(taint, obj))
+    setattr(obj, "untaint", MethodType(untaint, obj))
 
 
 def propagate_taint(method):

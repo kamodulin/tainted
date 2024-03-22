@@ -16,7 +16,7 @@ def print_results(test_name, reference_time, tainted_time):
 
 
 def test_speed():
-    NUM_ITERATIONS = 100_000
+    NUM_ITERATIONS = 500_000
 
     print("Running speed tests...")
 

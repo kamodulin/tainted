@@ -7,6 +7,12 @@ app = FastAPI()
 
 conn.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)")
 
+"""
+[1,"Alice","alice@example.com"]
+"""
+conn.execute('''
+    INSERT INTO users (name, email) VALUES (?, ?)
+''', ('Alice', 'alice@example.com'))
 
 def fetch_one(query: str):
     cursor = conn.cursor()

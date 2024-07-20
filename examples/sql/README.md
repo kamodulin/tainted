@@ -6,7 +6,10 @@ In this benchmark, we will demonstrate how our dynamic taint analysis can be use
 mitigate SQL injection attacks. We will use a simple Python web server that uses FastAPI
 to expose an endpoint for querying a sensitive database.
 
-After instrumenting the server with our taint analysis, it will be able to intercept a malicious input and raise an error before the query is even executed. For example, if an attacker issues an HTTP GET request to the /users/user id endpoint with a malicious parameter (e.g., user id="https://example.com/users/0 OR 1=1"), an exception will be raised. The server and database will continue to run normally, but, more importantly, the attack will be mitigated.
+After instrumenting the server with our taint analysis, it will be able to intercept a malicious input and raise an error before the query is even executed. 
+For example, if an attacker issues an HTTP GET request to the /users/user id endpoint with a malicious parameter 
+(e.g., user id="https://example.com/users/2 OR 1=1"), an exception will be raised. 
+The server and database will continue to run normally, but, more importantly, the attack will be mitigated.
 
 ## Running the Example
 
@@ -34,7 +37,11 @@ uvicorn sql_instrumented.main:app --reload
 Now try to issue a malicious request to the server:
 
 ```bash
-curl "http://localhost:8000/users/0;%20DROP%20TABLE%20users%20--"
+curl "http://127.0.0.1:8000/users/2%20or%201=1"
 ```
 
-Notice that the server will raise an exception, the database query will not be executed, and the server will continue to run normally.
+The query is intended to search for the user with Id equal to 2, 
+but the addition of 'or 1=1' causes it to return the user with Id equal to 1. 
+However, after instrumentation, the server will raise an exception, the database query will not be executed, 
+and the server will continue to run normally.
+
